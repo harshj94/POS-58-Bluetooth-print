@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: Semicolons Maven Webapp
+Implementation-Version: 1.0-SNAPSHOT
+Built-By: harsh_jain
+Specification-Title: Semicolons Maven Webapp
+Implementation-Vendor-Id: com.mh.common
+Build-Jdk: 1.8.0_111
+Specification-Version: 1.0-SNAPSHOT
+Created-By: Maven Integration for Eclipse
+

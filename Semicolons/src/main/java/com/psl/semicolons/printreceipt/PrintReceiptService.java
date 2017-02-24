@@ -7,15 +7,17 @@ import java.net.MalformedURLException;
 import javax.mail.MessagingException;
 
 import com.itextpdf.text.DocumentException;
+import com.psl.semicolons.model.Order;
 
 public interface PrintReceiptService {
 	
 	/**
-	 * method to print receipt
+	 * 
+	 * @param order
 	 * @throws FileNotFoundException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public void printReceipt() throws FileNotFoundException, IOException;
+	public void printReceipt(Order order) throws FileNotFoundException, IOException;
 	
 	/**
 	 * code to send email with attachment

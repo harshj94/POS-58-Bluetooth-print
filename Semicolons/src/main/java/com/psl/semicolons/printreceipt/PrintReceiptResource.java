@@ -33,12 +33,13 @@ public class PrintReceiptResource {
 
 		try {
 			logger.info("PrintReceiptResource: printReceipt: calling print receipt method");
-			//printReceiptService.printReceipt();
+			printReceiptService.printReceipt(order);
 			logger.info("PrintReceiptResource: printReceipt: End");
-			return Response.status(200).entity(order).build();
+			
+			return Response.status(200).entity("{" + "\"status\":\"Successful Printing\"}").build();
 		} catch (Exception e) {
 			logger.error("PrintReceiptResource: printReceipt: " + e.getMessage(), e);
-			return Response.status(200).entity(e).build();
+			return Response.status(404).entity("{" + "\"status\":\"Unsuccessful in Printing\"}").build();
 		}
 	}
 	
