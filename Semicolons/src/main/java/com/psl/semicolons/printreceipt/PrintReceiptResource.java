@@ -33,7 +33,7 @@ public class PrintReceiptResource {
 
 		try {
 			logger.info("PrintReceiptResource: printReceipt: calling print receipt method");
-			printReceiptService.printReceipt(order);
+			//printReceiptService.printReceipt(order);
 			logger.info("PrintReceiptResource: printReceipt: calling generate invoice method");
 			logger.info("PrintReceiptResource: printReceipt: calling send email method");
 			printReceiptService.sendMail(printReceiptService.generatePDFInvoice(order), order);

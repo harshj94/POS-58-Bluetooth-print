@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Properties;
 
@@ -81,13 +82,13 @@ public class MailTest {
 		order.setTotal_amount("700");
 
 		order.setItems(i);
-		
 
 		MailTest mailTest = new MailTest();
 		// mailTest.printReceipt(order);
-		String name = mailTest.generatePDFInvoice(order);
+		//String name = mailTest.generatePDFInvoice(order);
 		// mailTest.sendMail(name, order);
 		// mailTest.sendGet();
+		mailTest.process_sms("917841946249", "Test message");
 
 	}
 
@@ -171,7 +172,7 @@ public class MailTest {
 		dateFormatted = dateFormatted + ".pdf";
 
 		// opening document for writing
-		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream("D:\\receipt\\"+dateFormatted));
+		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream("D:\\receipt\\" + dateFormatted));
 		document.open();
 
 		PdfContentByte cb = pdfWriter.getDirectContent();
@@ -336,18 +337,6 @@ public class MailTest {
 		return inputLine;
 	}
 
-	private void sendGet() throws Exception {
-		URL oracle = new URL("http://www.oracle.com/");
-		URLConnection yc = oracle.openConnection();
-		BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
-		String inputLine;
-		while ((inputLine = in.readLine()) != null)
-			System.out.println(inputLine);
-		System.out.println("hi");
-		in.close();
-
-	}
-
 	public void printReceipt(Order order) throws IOException {
 
 		logger.info("PrintReceiptServiceImpl: printReceipt: Started");
@@ -390,5 +379,33 @@ public class MailTest {
 		ps.close();
 
 		logger.info("PrintReceiptServiceImpl: printReceipt: End");
+	}
+
+	public String process_sms(String mob_no, String message) throws IOException {
+
+		logger.info("PrintReceiptServiceImpl: process_sms: Start");
+
+		message = URLEncoder.encode(message, "UTF-8");
+		String working_key = "636n033l3549o14yp1ljdti3t81rk11v5";
+		String sender_id = "SEDEMO";
+
+		URL url = new URL("http://instantalerts.co/api/web/send?apikey=" + working_key + "&sender=" + sender_id + "&to=" + mob_no + "&message=" + message);
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+		con.setDoOutput(true);
+		con.getOutputStream();
+		con.getInputStream();
+		BufferedReader rd;
+		String line;
+		String result = "";
+		rd = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		while ((line = rd.readLine()) != null) {
+			result += line;
+		}
+		rd.close();
+		logger.info("PrintReceiptServiceImpl: process_sms: Result = " + result);
+		logger.info("PrintReceiptServiceImpl: process_sms: End");
+
+		return result;
 	}
 }
