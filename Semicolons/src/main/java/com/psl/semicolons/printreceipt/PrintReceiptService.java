@@ -23,15 +23,16 @@ public interface PrintReceiptService {
 	 * code to send email with attachment
 	 * @throws MessagingException 
 	 */
-	public void sendMail() throws MessagingException;
+	public void sendMail(String attachmentName, Order order) throws MessagingException;
 	
 	/**
-	 * code to create pdf invoice
+	 * code to create PDF invoice
+	 * @return the path of the document
 	 * @throws FileNotFoundException
 	 * @throws DocumentException
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public void generatePDFInvoice() throws FileNotFoundException, DocumentException, MalformedURLException, IOException;
+	public String generatePDFInvoice(Order order) throws FileNotFoundException, DocumentException, MalformedURLException, IOException;
 
 }

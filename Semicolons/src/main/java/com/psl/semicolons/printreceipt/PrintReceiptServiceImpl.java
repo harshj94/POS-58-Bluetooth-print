@@ -4,8 +4,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -20,47 +24,86 @@ import javax.mail.internet.MimeMultipart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.psl.semicolons.model.Items;
 import com.psl.semicolons.model.Order;
 
 public class PrintReceiptServiceImpl implements PrintReceiptService {
 
 	private static final Logger logger = LoggerFactory.getLogger(PrintReceiptServiceImpl.class);
 
+	String path = "C:\\Users\\harsh_jain\\git\\POS-58-Bluetooth-print\\Semicolons\\";
+
 	public void printReceipt(Order order) throws IOException {
 
 		logger.info("PrintReceiptServiceImpl: printReceipt: Started");
 
-		// for printing the text
-		FileOutputStream os = new FileOutputStream("COM9");
+		FileOutputStream os = new FileOutputStream("COM5");
 		PrintStream ps = new PrintStream(os);
-		ps.println("Receipt Sucessfully Printed");
-		ps.println("order id:"+order.getOrder_id());
-		
+
+		ps.println("--------WINNOVATORS PIZZA-------");
+		ps.println("Persistent System, Nal Stop");
+		ps.println("Erandwane, Near Sharada Centre");
+		ps.println("Pune - 411004");
+		ps.println("Email : feedback@winnovators.com");
+		ps.println("------------------------------");
+
+		ps.println("Order ID : " + order.getOrder_id());
+		ps.println("Customer : " + order.getCust_id());
+		ps.println("Contact: " + order.getContact_number());
+
+		ps.println("------------------------------");
+
+		ps.println("Q  Items                  Total");
+		for (Items It : order.getItems()) {
+			ps.printf("%-22s %8s %n", It.getQuantity() + " " + It.getItem_name(), It.getTotal_p());
+		}
+
+		ps.println("------------------------------");
+		ps.printf("%-20s %10s %n", "Sub Total ", order.getTotal_amount());
+
+		ps.printf("%-20s %10s %n", "Service Tax(14%) ", order.getTaxable_amount());
+
+		ps.printf("%-20s %10s %n", "Grand Total ", order.getGrand_total());
+
+		ps.println("------------------------------");
+
+		ps.println("Thank you , Please Visit Again");
+		ps.println("###### Team Winnovators ######");
+		ps.println("\n");
+
 		ps.print("\f");
 		ps.close();
-
-		// for printing image using CMD command
-//		Runtime rt = Runtime.getRuntime();
-//		rt.exec(new String[] { "cmd.exe", "/c", "start" });
-//		rt.exec("mspaint /p C:\\Users\\harsh\\Desktop\\demo.png");
-//		rt.exec("taskkill /f /im cmd.exe");
 
 		logger.info("PrintReceiptServiceImpl: printReceipt: End");
 	}
 
-	public void sendMail() throws MessagingException {
+	public void sendMail(String attachmentName, Order order) throws MessagingException {
 
 		logger.info("PrintReceiptServiceImpl: sendMail: Started");
 
 		Properties properties = System.getProperties();
-		String from = "harshj94@outlook.com";
-		String pass = "Hkj@24031994";
-		String to = "harsh_jain@persistent.co.in";
+		String from = "sachin_jagtap@persistent.co.in";
+		String pass = "Feb@2017";
+		String to = order.getEmail_id();
 		final String USERNAME = from;
 
 		properties.put("mail.smtp.starttls.enable", "true");
-		properties.put("mail.smtp.host", "smtp.live.com");
+		properties.put("mail.smtp.host", "mail.persistent.co.in");
 		properties.put("mail.smtp.user", from);
 		properties.put("mail.smtp.password", pass);
 		properties.put("mail.smtp.port", "587");
@@ -72,12 +115,12 @@ public class PrintReceiptServiceImpl implements PrintReceiptService {
 		Message mime = new MimeMessage(session);
 		mime.setFrom(new InternetAddress(USERNAME));
 		mime.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
-		mime.setSubject("subject");
+		mime.setSubject("Winnovators Pizza Invoice for Order Id: " + order.getOrder_id());
 
 		BodyPart messageBodyPart = new MimeBodyPart();
 
 		// Now set the actual message
-		messageBodyPart.setText("This is message body");
+		messageBodyPart.setText("Hi " + order.getCust_id() + "\n\nPFA the invoice for your order.\n\nWe look forward to serve you again.\n\nThanks\nWinnovators Pizza");
 
 		// Create a multi part message
 		Multipart multipart = new MimeMultipart();
@@ -85,41 +128,196 @@ public class PrintReceiptServiceImpl implements PrintReceiptService {
 		// Set text message part
 		multipart.addBodyPart(messageBodyPart);
 
-//		// Part two is attachment
-//		messageBodyPart = new MimeBodyPart();
-//
-//		// give the file path
-//		String filename = "C:\\Users\\harsh\\Desktop\\demo.png";
-//		DataSource source = new FileDataSource(filename);
-//		messageBodyPart.setDataHandler(new DataHandler(source));
-//		messageBodyPart.setFileName(filename);
-//		multipart.addBodyPart(messageBodyPart);
+		// Part two is attachment
+		messageBodyPart = new MimeBodyPart();
+
+		// give the file path
+		String filename = path + attachmentName;
+		DataSource source = new FileDataSource(filename);
+		messageBodyPart.setDataHandler(new DataHandler(source));
+		messageBodyPart.setFileName("Invoice.pdf");
+		multipart.addBodyPart(messageBodyPart);
 
 		// Send the complete message parts
 		mime.setContent(multipart);
 
 		Transport transport = session.getTransport("smtp");
-		transport.connect("smtp.live.com", from, pass);
+		transport.connect("mail.persistent.co.in", from, pass);
 		transport.sendMessage(mime, mime.getAllRecipients());
 		transport.close();
 
 		logger.info("PrintReceiptServiceImpl: sendMail: End");
 	}
 
-	public void generatePDFInvoice() throws DocumentException, MalformedURLException, IOException {
+	public String generatePDFInvoice(Order order) throws DocumentException, MalformedURLException, IOException {
 
 		logger.info("PrintReceiptServiceImpl: generatePDFInvoice: Started");
+		Document document = new Document(PageSize.A4, 0f, 0f, 0f, 0f);
 
-//		Document document = new Document();
-//		PdfWriter.getInstance(document, new FileOutputStream("sample1.pdf"));
-//		document.open();
-//		Image img = Image.getInstance("C:\\Users\\harsh\\Desktop\\demo.png");
-//		document.add(new Paragraph("Sample 1: This is simple image demo."));
-//		document.add(img);
-//		document.close();
+		// fonts for document
+		Font body = FontFactory.getFont("Times-Roman", 8);
+		Font companyName = FontFactory.getFont("Times-Roman", 15, Font.BOLD);
+		Font orderName = FontFactory.getFont("Times-Roman", 9);
+		Font totalAmount = FontFactory.getFont("Times-Roman", 10, Font.BOLD);
+		Font tableHeader = FontFactory.getFont("Times-Roman", 9, Font.BOLD);
+		Font userName = FontFactory.getFont("Times-Roman", 10);
+		BaseFont bf = BaseFont.createFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+
+		userName.setColor(BaseColor.DARK_GRAY);
+
+		// determining file name based on current time to maintain uniqueness
+		Date date = new Date();
+		String dateFormatted = date.toString().replace(" ", "");
+		dateFormatted = dateFormatted.toString().replace(":", "");
+		dateFormatted = dateFormatted + ".pdf";
+
+		// opening document for writing
+		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(dateFormatted));
+		document.open();
+
+		PdfContentByte cb = pdfWriter.getDirectContent();
+
+		// adding image to PDF
+		Image img = Image.getInstance(path + "Logo1.png");
+		img.setAbsolutePosition(405f, 720f);
+		document.add(img);
+
+		// adding paragraph to PDF file
+		Paragraph paragraph = new Paragraph("\nINVOICE", body);
+		paragraph.setAlignment(Element.ALIGN_CENTER);
+		document.add(paragraph);
+
+		paragraph = new Paragraph("      Winnovators Pizza", companyName);
+		paragraph.setAlignment(Element.ALIGN_LEFT);
+		document.add(paragraph);
+
+		paragraph = new Paragraph("             9A, Bharati Niwas Colony, Nal Stop" + "\n            Erandwane, Near Sharada Centre" + "\n            Pune - 411004" + "\n            Maharashtra" + "\n            Mobile: 9876543210" + "\n            Email: winnovators@persistent.co.in", body);
+		paragraph.setAlignment(Element.ALIGN_LEFT);
+		document.add(paragraph);
+
+		Rectangle rect = new Rectangle(20, 710, 570, 710);
+		rect.setBorder(Rectangle.BOX);
+		rect.setBorderWidth(1);
+		rect.setBorderColor(BaseColor.LIGHT_GRAY);
+		document.add(rect);
+
+		paragraph = new Paragraph("\n          Invoice Id: " + order.getOrder_id() + "\n          Invoice date: " + date.toString(), userName);
+		paragraph.setAlignment(Element.ALIGN_LEFT);
+		document.add(paragraph);
+
+		rect = new Rectangle(20, 665, 570, 665);
+		rect.setBorder(Rectangle.BOX);
+		rect.setBorderWidth(1);
+		rect.setBorderColor(BaseColor.LIGHT_GRAY);
+		document.add(rect);
+
+		paragraph = new Paragraph("\n          Name: " + order.getCust_id() + "\n          Mobile: " + order.getContact_number() + "\n          Email: " + order.getEmail_id(), userName);
+		paragraph.setAlignment(Element.ALIGN_LEFT);
+		document.add(paragraph);
+
+		rect = new Rectangle(20, 608, 570, 608);
+		rect.setBorder(Rectangle.BOX);
+		rect.setBorderWidth(1);
+		rect.setBorderColor(BaseColor.LIGHT_GRAY);
+		document.add(rect);
+
+		paragraph = new Paragraph("\nOrder Details\n\n", body);
+		paragraph.setAlignment(Element.ALIGN_CENTER);
+		document.add(paragraph);
+
+		PdfPTable table = new PdfPTable(4);
+		table.addCell(new Paragraph("Serial Number", tableHeader));
+		table.addCell(new Paragraph("Name", tableHeader));
+		table.addCell(new Paragraph("Quantity", tableHeader));
+		table.addCell(new Paragraph("Amount", tableHeader));
+
+		for (int tableCell = 0; tableCell < order.getItems().length; tableCell++) {
+			table.addCell(new Paragraph(tableCell + 1 + "", orderName));
+			table.addCell(new Paragraph(order.getItems()[tableCell].getItem_name(), orderName));
+			table.addCell(new Paragraph(order.getItems()[tableCell].getQuantity(), orderName));
+			table.addCell(new Paragraph(order.getItems()[tableCell].getTotal_p(), orderName));
+		}
+
+		PdfPCell cell = new PdfPCell(new Paragraph(" ", body));
+		cell.setColspan(4);
+		table.addCell(cell);
+
+		cell = new PdfPCell(new Paragraph(" ", body));
+		cell.setColspan(2);
+		table.addCell(cell);
+
+		table.addCell(new Paragraph("Sub-Total", body));
+		table.addCell(new Paragraph(order.getTotal_amount(), body));
+
+		cell = new PdfPCell(new Paragraph(" ", body));
+		cell.setColspan(2);
+		table.addCell(cell);
+
+		table.addCell(new Paragraph("Service Tax @ 14%", body));
+		table.addCell(new Paragraph(order.getTaxable_amount(), body));
+
+		table.addCell(cell);
+
+		table.addCell(new Paragraph("Total Amount", totalAmount));
+		table.addCell(new Paragraph(order.getGrand_total(), totalAmount));
+		document.add(table);
+
+		cb.saveState();
+		cb.beginText();
+		cb.moveText(250, 360);
+		cb.setFontAndSize(bf, 10);
+		cb.showText("Total Amount: Rs. " + order.getGrand_total());
+		cb.endText();
+		cb.restoreState();
+
+		// adding image to PDF
+		img = Image.getInstance(path + "rsz_paytm.png");
+		img.setAbsolutePosition(243f, 240f);
+		document.add(img);
+
+		cb.saveState();
+		cb.beginText();
+		cb.moveText(245, 225);
+		cb.setFontAndSize(bf, 8);
+		cb.showText("Scan this Paytm QR code to pay");
+		cb.endText();
+		cb.restoreState();
+
+		cb.saveState();
+		cb.beginText();
+		cb.moveText(190, 185);
+		cb.setFontAndSize(bf, 12);
+		cb.showText("Thankyou. We look forward to see you again. :)");
+		cb.endText();
+		cb.restoreState();
+
+		cb.saveState();
+		cb.beginText();
+		cb.moveText(30, 30);
+		cb.setFontAndSize(bf, 8);
+		cb.showText("Note: This is an electronically generated invoice and does not require a physical signature.");
+		cb.endText();
+		cb.restoreState();
+
+		rect = new Rectangle(20, 100, 570, 100);
+		rect.setBorder(Rectangle.BOX);
+		rect.setBorderWidth(1);
+		rect.setBorderColor(BaseColor.LIGHT_GRAY);
+		document.add(rect);
+
+		// adding border to document
+		rect = new Rectangle(584, 832);
+		rect.setLeft(10f);
+		rect.setBottom(10f);
+		rect.setBorder(Rectangle.BOX);
+		rect.setBorderWidth(4);
+		rect.setBorderColor(BaseColor.LIGHT_GRAY);
+		document.add(rect);
+
+		// closing document
+		document.close();
 
 		logger.info("PrintReceiptServiceImpl: generatePDFInvoice: End");
-
+		return dateFormatted;
 	}
-
 }
