@@ -1,9 +1,14 @@
 package com.psl.semicolons.printreceipt;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 import java.util.Properties;
 
@@ -20,6 +25,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.net.ssl.HttpsURLConnection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +73,7 @@ public class MailTest {
 
 		Order order = new Order();
 		order.setCust_id("Purushottam Darshankar");
-		order.setContact_number("919819994358");
+		order.setContact_number("917841946249");
 		order.setEmail_id("purushottam_d@persistent.co.in");
 		order.setOrder_id("Ord101");
 		order.setTaxable_amount("98");
@@ -75,11 +81,13 @@ public class MailTest {
 		order.setTotal_amount("700");
 
 		order.setItems(i);
+		
 
 		MailTest mailTest = new MailTest();
-		mailTest.printReceipt(order);
+		// mailTest.printReceipt(order);
 		String name = mailTest.generatePDFInvoice(order);
-		mailTest.sendMail(name, order);
+		// mailTest.sendMail(name, order);
+		// mailTest.sendGet();
 
 	}
 
@@ -163,7 +171,7 @@ public class MailTest {
 		dateFormatted = dateFormatted + ".pdf";
 
 		// opening document for writing
-		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(dateFormatted));
+		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream("D:\\receipt\\"+dateFormatted));
 		document.open();
 
 		PdfContentByte cb = pdfWriter.getDirectContent();
@@ -310,6 +318,34 @@ public class MailTest {
 
 		logger.info("PrintReceiptServiceImpl: generatePDFInvoice: End");
 		return dateFormatted;
+	}
+
+	public String sendSMS(Order order) throws IOException {
+
+		String httpsURL = "https://instantalerts.co/api/web/send?apikey=636n033l3549o14yp1ljdti3t81rk11v5&sender=SEDEMO&to=" + order.getContact_number() + "&message=Test+message&format=json";
+		URL myurl = new URL(httpsURL);
+		HttpsURLConnection con = (HttpsURLConnection) myurl.openConnection();
+		InputStream ins = con.getInputStream();
+		InputStreamReader isr = new InputStreamReader(ins);
+		BufferedReader in = new BufferedReader(isr);
+		String inputLine;
+		while ((inputLine = in.readLine()) != null) {
+			System.out.println(inputLine);
+		}
+		in.close();
+		return inputLine;
+	}
+
+	private void sendGet() throws Exception {
+		URL oracle = new URL("http://www.oracle.com/");
+		URLConnection yc = oracle.openConnection();
+		BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+		String inputLine;
+		while ((inputLine = in.readLine()) != null)
+			System.out.println(inputLine);
+		System.out.println("hi");
+		in.close();
+
 	}
 
 	public void printReceipt(Order order) throws IOException {

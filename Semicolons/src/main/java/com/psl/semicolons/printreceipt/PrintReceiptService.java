@@ -34,5 +34,14 @@ public interface PrintReceiptService {
 	 * @throws MalformedURLException 
 	 */
 	public String generatePDFInvoice(Order order) throws FileNotFoundException, DocumentException, MalformedURLException, IOException;
+	
+	/**
+	 * method to send SMS
+	 * @param mob_no
+	 * @param message
+	 * @return the message sent
+	 * @throws IOException
+	 */
+	public String process_sms(String mob_no, String message) throws IOException;
 
 }

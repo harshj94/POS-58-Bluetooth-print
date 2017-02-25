@@ -2,5 +2,5 @@ com\psl\semicolons\printreceipt\PrintReceiptResource.class
 com\psl\semicolons\model\Order.class
 com\psl\semicolons\printreceipt\PrintReceiptService.class
 com\psl\semicolons\model\Items.class
-com\psl\semicolons\printreceipt\TestingClass.class
+com\psl\semicolons\printreceipt\MailTest.class
 com\psl\semicolons\printreceipt\PrintReceiptServiceImpl.class

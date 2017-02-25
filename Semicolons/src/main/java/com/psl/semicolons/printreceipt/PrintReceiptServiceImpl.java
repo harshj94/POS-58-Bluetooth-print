@@ -1,9 +1,14 @@
 package com.psl.semicolons.printreceipt;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Properties;
 
@@ -172,7 +177,7 @@ public class PrintReceiptServiceImpl implements PrintReceiptService {
 		dateFormatted = dateFormatted + ".pdf";
 
 		// opening document for writing
-		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(dateFormatted));
+		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(path+dateFormatted));
 		document.open();
 
 		PdfContentByte cb = pdfWriter.getDirectContent();
@@ -320,4 +325,34 @@ public class PrintReceiptServiceImpl implements PrintReceiptService {
 		logger.info("PrintReceiptServiceImpl: generatePDFInvoice: End");
 		return dateFormatted;
 	}
+	
+	public String process_sms(String mob_no, String message) throws IOException {
+		
+		logger.info("PrintReceiptServiceImpl: process_sms: Start");
+
+		message = URLEncoder.encode(message, "UTF-8");
+		String working_key = "636n033l3549o14yp1ljdti3t81rk11v5";
+		String sender_id = "SEDEMO";
+
+		URL url = new URL("http://instantalerts.co/api/web/send?apikey=" + working_key + "&sender=" + sender_id + "&to="
+				+ mob_no + "&message=" + message);
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+		con.setDoOutput(true);
+		con.getOutputStream();
+		con.getInputStream();
+		BufferedReader rd;
+		String line;
+		String result = "";
+		rd = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		while ((line = rd.readLine()) != null) {
+			result += line;
+		}
+		rd.close();
+		logger.info("PrintReceiptServiceImpl: process_sms: Result = "+result);
+		logger.info("PrintReceiptServiceImpl: process_sms: End");
+
+		return result;
+	}
+
 }

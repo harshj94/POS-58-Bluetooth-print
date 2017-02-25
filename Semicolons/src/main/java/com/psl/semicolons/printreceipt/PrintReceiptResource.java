@@ -35,9 +35,10 @@ public class PrintReceiptResource {
 			logger.info("PrintReceiptResource: printReceipt: calling print receipt method");
 			printReceiptService.printReceipt(order);
 			logger.info("PrintReceiptResource: printReceipt: calling generate invoice method");
-			String attachmentName=printReceiptService.generatePDFInvoice(order);
 			logger.info("PrintReceiptResource: printReceipt: calling send email method");
-			printReceiptService.sendMail(attachmentName, order);
+			printReceiptService.sendMail(printReceiptService.generatePDFInvoice(order), order);
+			logger.info("PrintReceiptResource: printReceipt: calling send message");
+			printReceiptService.process_sms(order.getContact_number(), "Test Message");
 			logger.info("PrintReceiptResource: printReceipt: End");
 			
 			return Response.status(200).entity("{" + "\"status\":\"Successful Printing\"}").build();
