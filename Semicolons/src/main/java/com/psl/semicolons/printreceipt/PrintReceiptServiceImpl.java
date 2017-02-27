@@ -102,8 +102,8 @@ public class PrintReceiptServiceImpl implements PrintReceiptService {
 		logger.info("PrintReceiptServiceImpl: sendMail: Started");
 
 		Properties properties = System.getProperties();
-		String from = "sachin_jagtap@persistent.co.in";
-		String pass = "Feb@2017";
+		String from = "********";	//your email id here
+		String pass = "********";	//your password here
 		String to = order.getEmail_id();
 		final String USERNAME = from;
 
